@@ -1,0 +1,18 @@
+#+TITLE: Head First C
+#+DESCRIPTION: Head First C
+#+KEYWORDS: Head First C,C Tutorial,C Development,C Development Book,C,Head First,O'Reilly,O'Reilly Media
+#+STARTUP: hideblocks
+#+AUTHOR: Dawn Griffiths and David Griffiths
+
+#+ATTR_HTML: :width 100% :class nav-tab
+| [[https://github.com/dogriffiths/HeadFirstC][Source repository]] |
+
+* Get the book
+
+[[http://www.amazon.com/Head-First-C-David-Griffiths/dp/1449399916][file:images/hfccover.jpg]]
+
+#+ATTR_HTML: :class btn btn-success
+[[http://www.amazon.com/Head-First-C-David-Griffiths/dp/1449399916][Buy it now!]]
+
+[[./map.html][Download the map]]
+
