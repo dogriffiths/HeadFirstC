@@ -18,3 +18,27 @@
 
 [[./spooky.csv][Download spooky.csv]]
 
+* Arduino lab code
+
+The book contains a number of software labs, which describing interesting technology that can be programmed in C. The first of these labs is for the Arduino micro-controller. We ask you to create a plant monitoring system which will report when a plant needs watering. If you are working on a Mac, you can make this code a lot cooler, because the Mac has built-in speech synthesis software. If you create a script like this:
+
+#+BEGIN_SRC bash code 
+#!/bin/bash
+while true
+do
+  read level
+  say "$level"
+done
+#+END_SRC
+
+and put it in a file called something like =speak.sh=, you can run it from the Terminal and it will say everything you type in:
+
+#+BEGIN_SRC shell interactive 
+$ ./speak.sh
+Hello 
+Goodbye
+#+END_SRC
+
+If you get your Arduino code to send data to the serial port, and you redirect this data into the =speak.sh= script, you can get your Arduino to talk!
+
+Have fun. :-)
