@@ -16,3 +16,5 @@
 
 [[./map.html][Download the map]]
 
+[[./spooky.csv][Download spooky.csv]]
+
