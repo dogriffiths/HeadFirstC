@@ -16,7 +16,7 @@
  * Instead, we've slightly re-written the code so that instead of 
  * using a while{} loop, it now uses a do-while{} loop.
  *
- * A do-while{} loop checks the lopp condition at the *end* of the
+ * A do-while{} loop checks the loop condition at the *end* of the
  * loop, and by the time we get to the end of the loop the
  * card_name array has been set to whatever the typed in at the keyboard.
  *
