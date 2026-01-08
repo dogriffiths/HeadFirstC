@@ -103,30 +103,13 @@
     
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="./output.json"></script>
     
     <script>
-        // GPS Data
-        const gpsData = [
-            {latitude: 42.363400, longitude: -71.098465, info: 'Speed = 21'},
-            {latitude: 42.363327, longitude: -71.097588, info: 'Speed = 23'},
-            {latitude: 42.363255, longitude: -71.096710, info: 'Speed = 17'},
-            {latitude: 42.363182, longitude: -71.095833, info: 'Speed = 22'},
-            {latitude: 42.363110, longitude: -71.094955, info: 'Speed = 14'},
-            {latitude: 42.363037, longitude: -71.094078, info: 'Speed = 16'},
-            {latitude: 42.362965, longitude: -71.093201, info: 'Speed = 18'},
-            {latitude: 42.362892, longitude: -71.092323, info: 'Speed = 22'},
-            {latitude: 42.362820, longitude: -71.091446, info: 'Speed = 17'},
-            {latitude: 42.362747, longitude: -71.090569, info: 'Speed = 23'},
-            {latitude: 42.362675, longitude: -71.089691, info: 'Speed = 14'},
-            {latitude: 42.362602, longitude: -71.088814, info: 'Speed = 19'},
-            {latitude: 42.362530, longitude: -71.087936, info: 'Speed = 16'},
-            {latitude: 42.362457, longitude: -71.087059, info: 'Speed = 16'},
-            {latitude: 42.362385, longitude: -71.086182, info: 'Speed = 21'}
-        ];
         
         // Calculate center of all points
-        const centerLat = gpsData.reduce((sum, point) => sum + point.latitude, 0) / gpsData.length;
-        const centerLng = gpsData.reduce((sum, point) => sum + point.longitude, 0) / gpsData.length;
+        const centerLat = data.reduce((sum, point) => sum + point.latitude, 0) / data.length;
+        const centerLng = data.reduce((sum, point) => sum + point.longitude, 0) / data.length;
         
         // Initialize map
         const map = L.map('map').setView([centerLat, centerLng], 14);
@@ -163,7 +146,7 @@
         // Add markers and create polyline
         const latLngs = [];
         
-        gpsData.forEach((point, index) => {
+        data.forEach((point, index) => {
             const speed = extractSpeed(point.info);
             const color = getMarkerColor(speed);
             const icon = createCustomIcon(color);
@@ -209,17 +192,17 @@
         }
         
         let totalDistance = 0;
-        for (let i = 0; i < gpsData.length - 1; i++) {
+        for (let i = 0; i < data.length - 1; i++) {
             totalDistance += calculateDistance(
-                gpsData[i].latitude,
-                gpsData[i].longitude,
-                gpsData[i + 1].latitude,
-                gpsData[i + 1].longitude
+                data[i].latitude,
+                data[i].longitude,
+                data[i + 1].latitude,
+                data[i + 1].longitude
             );
         }
         
         // Update info panel
-        document.getElementById('pointCount').textContent = gpsData.length;
+        document.getElementById('pointCount').textContent = data.length;
         document.getElementById('distance').textContent = totalDistance.toFixed(0);
         
         // Fit map to show all markers
