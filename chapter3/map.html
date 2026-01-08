@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPS Tracking Map</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        
+        .info-panel {
+            background-color: white;
+            padding: 15px;
+            margin: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        #map {
+            height: 600px;
+            margin: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        
+        .legend {
+            background-color: white;
+            padding: 10px;
+            margin: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+        }
+        
+        .legend-marker {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .speed-low { background-color: #27ae60; }
+        .speed-medium { background-color: #f39c12; }
+        .speed-high { background-color: #e74c3c; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>GPS Tracking Map</h1>
+    </div>
+    
+    <div class="info-panel">
+        <p><strong>Total Points:</strong> <span id="pointCount">0</span></p>
+        <p><strong>Route Distance:</strong> Approximately <span id="distance">0</span> meters</p>
+    </div>
+    
+    <div id="map"></div>
+    
+    <div class="legend">
+        <h3>Speed Legend</h3>
+        <div class="legend-item">
+            <div class="legend-marker speed-low"></div>
+            <span>Low Speed (< 18)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-marker speed-medium"></div>
+            <span>Medium Speed (18-20)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-marker speed-high"></div>
+            <span>High Speed (> 20)</span>
+        </div>
+    </div>
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+        // GPS Data
+        const gpsData = [
+            {latitude: 42.363400, longitude: -71.098465, info: 'Speed = 21'},
+            {latitude: 42.363327, longitude: -71.097588, info: 'Speed = 23'},
+            {latitude: 42.363255, longitude: -71.096710, info: 'Speed = 17'},
+            {latitude: 42.363182, longitude: -71.095833, info: 'Speed = 22'},
+            {latitude: 42.363110, longitude: -71.094955, info: 'Speed = 14'},
+            {latitude: 42.363037, longitude: -71.094078, info: 'Speed = 16'},
+            {latitude: 42.362965, longitude: -71.093201, info: 'Speed = 18'},
+            {latitude: 42.362892, longitude: -71.092323, info: 'Speed = 22'},
+            {latitude: 42.362820, longitude: -71.091446, info: 'Speed = 17'},
+            {latitude: 42.362747, longitude: -71.090569, info: 'Speed = 23'},
+            {latitude: 42.362675, longitude: -71.089691, info: 'Speed = 14'},
+            {latitude: 42.362602, longitude: -71.088814, info: 'Speed = 19'},
+            {latitude: 42.362530, longitude: -71.087936, info: 'Speed = 16'},
+            {latitude: 42.362457, longitude: -71.087059, info: 'Speed = 16'},
+            {latitude: 42.362385, longitude: -71.086182, info: 'Speed = 21'}
+        ];
+        
+        // Calculate center of all points
+        const centerLat = gpsData.reduce((sum, point) => sum + point.latitude, 0) / gpsData.length;
+        const centerLng = gpsData.reduce((sum, point) => sum + point.longitude, 0) / gpsData.length;
+        
+        // Initialize map
+        const map = L.map('map').setView([centerLat, centerLng], 14);
+        
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
+        
+        // Function to get marker color based on speed
+        function getMarkerColor(speed) {
+            if (speed < 18) return '#27ae60'; // Green
+            if (speed <= 20) return '#f39c12'; // Orange
+            return '#e74c3c'; // Red
+        }
+        
+        // Function to extract speed from info string
+        function extractSpeed(infoString) {
+            const match = infoString.match(/Speed = (\d+)/);
+            return match ? parseInt(match[1]) : 0;
+        }
+        
+        // Create custom icon function
+        function createCustomIcon(color) {
+            return L.divIcon({
+                className: 'custom-marker',
+                html: `<div style="background-color: ${color}; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+            });
+        }
+        
+        // Add markers and create polyline
+        const latLngs = [];
+        
+        gpsData.forEach((point, index) => {
+            const speed = extractSpeed(point.info);
+            const color = getMarkerColor(speed);
+            const icon = createCustomIcon(color);
+            
+            const marker = L.marker([point.latitude, point.longitude], { icon: icon })
+                .addTo(map)
+                .bindPopup(`
+                    <div style="text-align: center;">
+                        <strong>Point ${index + 1}</strong><br>
+                        ${point.info}<br>
+                        <small>Lat: ${point.latitude.toFixed(6)}<br>
+                        Lng: ${point.longitude.toFixed(6)}</small>
+                    </div>
+                `);
+            
+            latLngs.push([point.latitude, point.longitude]);
+        });
+        
+        // Draw route line
+        if (latLngs.length > 1) {
+            L.polyline(latLngs, {
+                color: '#3498db',
+                weight: 3,
+                opacity: 0.7,
+                dashArray: '10, 5'
+            }).addTo(map);
+        }
+        
+        // Calculate approximate distance
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; // Earth's radius in meters
+            const φ1 = lat1 * Math.PI / 180;
+            const φ2 = lat2 * Math.PI / 180;
+            const Δφ = (lat2 - lat1) * Math.PI / 180;
+            const Δλ = (lon2 - lon1) * Math.PI / 180;
+            
+            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                      Math.cos(φ1) * Math.cos(φ2) *
+                      Math.sin(Δλ/2) * Math.sin(Δλ/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            
+            return R * c;
+        }
+        
+        let totalDistance = 0;
+        for (let i = 0; i < gpsData.length - 1; i++) {
+            totalDistance += calculateDistance(
+                gpsData[i].latitude,
+                gpsData[i].longitude,
+                gpsData[i + 1].latitude,
+                gpsData[i + 1].longitude
+            );
+        }
+        
+        // Update info panel
+        document.getElementById('pointCount').textContent = gpsData.length;
+        document.getElementById('distance').textContent = totalDistance.toFixed(0);
+        
+        // Fit map to show all markers
+        if (latLngs.length > 0) {
+            map.fitBounds(latLngs, { padding: [50, 50] });
+        }
+    </script>
+</body>
+</html>
