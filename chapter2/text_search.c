@@ -9,14 +9,6 @@ char tracks[][80] = {
   "The girl from Iwo Jima",
 };
 
-int main()
-{
-  char search_for[80];
-  printf("Search for: ");
-  scanf("%79s", search_for);
-  find_track(search_for);
-  return 0;
-}
 void find_track(char search_for[])
 {
   int i;
@@ -26,3 +18,12 @@ void find_track(char search_for[])
   }
 }
 
+int main()
+{
+  char search_for[80];
+  printf("Search for: ");
+  fgets(search_for, 80, stdin);  // Keeps the fgets function like suggested in the book, 2012 edition
+  search_for[strlen(search_for) - 1] = '\0';  // But modify the last char so that it isn't \n
+  find_track(search_for);
+  return 0;
+}
